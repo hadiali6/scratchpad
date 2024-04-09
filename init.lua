@@ -83,7 +83,30 @@ function scratchpad:apply_props()
     end
 end
 
-function scratchpad:toggle()
+function scratchpad:unapply_props()
+    local props = self:get_client_options()
+    if self.client then
+        if self.client.hidden then
+            self.client.hidden = false
+            self.client:move_to_tag(awful.tag.selected(self.screen))
+        end
+        if props.floating then
+            self.client:set_floating(false)
+        end
+        if props.ontop then
+            self.client.ontop = false
+        end
+        if props.above then
+            self.client.above = false
+        end
+        if props.sticky then
+            self.client.sticky = false
+        end
+        self.client.skip_taskbar = false
+    end
+end
+
+function scratchpad:startup()
     if has_been_run == false then
         has_been_run = true
         capi.client.connect_signal("request::unmanage", function (current_client)
@@ -92,7 +115,10 @@ function scratchpad:toggle()
             end
         end)
     end
+end
 
+function scratchpad:toggle()
+    self:startup()
     if not self.client then
         local initial_apply; initial_apply = function (c)
             self.client = c
@@ -123,45 +149,22 @@ function scratchpad:toggle()
     end
 end
 
-local function toggleprop(c, prop)
-    c.ontop  = prop.ontop  or false
-    c.above  = prop.above  or false
-    c.hidden = prop.hidden or false
-    c.sticky = prop.stick  or false
-    c.skip_taskbar = prop.task or false
-end
-
-function scratchpad:set(client, width, height, sticky, screen)
-    width  = width  or 0.50
-    height = height or 0.50
-    sticky = sticky or false
-    screen = screen or awful.screen.focused()
-
+function scratchpad:set(client)
     local function setscratch(c)
         self.client = c
         self:apply_props()
     end
-
-    if not scratchpad.pad then
-        scratchpad.pad = {}
-        capi.client.connect_signal("request::unmanage", function (c)
-            for scr, cl in pairs(scratchpad.pad) do
-                if cl == c then scratchpad.pad[scr] = nil end
-            end
-        end)
-    end
-
-    if not scratchpad.pad[screen] then
-        scratchpad.pad[screen] = client
-        setscratch(client)
+    self:startup()
+    if not self.client then
+        self.client = client
+        setscratch(self.client)
     else
-        local oc = scratchpad.pad[screen]
-        awful.client.floating.toggle(oc)
-        toggleprop(oc, {})
-        if oc == client then
-            scratchpad.pad[screen] = nil
+        self:unapply_props()
+        if self.client == client then
+            self.client = nil
         else
-            scratchpad.pad[screen] = client; setscratch(client)
+            self.client = client
+            setscratch(client)
         end
     end
 end
