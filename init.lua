@@ -30,32 +30,32 @@ end
 ---Getter for client options table. Will define any property if it wasn't already defined.
 ---@return table: Client options.
 function scratchpad:get_client_options()
-    local tbl = {}
-    tbl.floating     = self.options.floating     or false
-    tbl.skip_taskbar = self.options.skip_taskbar or false
-    tbl.ontop        = self.options.ontop        or false
-    tbl.above        = self.options.above        or false
-    tbl.sticky       = self.options.sticky       or false
+    local options = {}
+    options.floating     = self.options.floating     or false
+    options.skip_taskbar = self.options.skip_taskbar or false
+    options.ontop        = self.options.ontop        or false
+    options.above        = self.options.above        or false
+    options.sticky       = self.options.sticky       or false
     if self.options.geometry then
-        tbl.geometry = {
+        options.geometry = {
             width  = self.options.geometry.width  or 1200,
             height = self.options.geometry.height or 900,
             x      = self.options.geometry.x      or 360,
             y      = self.options.geometry.y      or 90,
         }
     else
-        tbl.geometry = {
+        options.geometry = {
             width  = 1200,
             height = 900,
             x      = 360,
             y      = 90,
         }
     end
-    return tbl
+    return options
 end
 
 ---Apply client properties to the scratchpad as per defined in options table.
-function scratchpad:apply_props()
+function scratchpad:apply_properties()
     if not self.client then
         return
     end
@@ -93,7 +93,7 @@ function scratchpad:apply_props()
 end
 
 ---Disable any client properties applied to the scratchpad as per defined in options table.
-function scratchpad:unapply_props()
+function scratchpad:unapply_properties()
     if not self.client then
         return
     end
@@ -131,15 +131,14 @@ function scratchpad:connect_unmanage_signal()
     end
 end
 
----Enable scratchpad visiblity.
+---Enable current scratchpad client visibility.
 function scratchpad:turn_on()
     self.client.hidden = false
     self.client:move_to_tag(awful.tag.selected(self.screen))
-    self.client:raise()
     capi.client.focus = self.client
 end
 
----Disable scratchpad visiblity.
+---Disable current scratchpad client visibility.
 function scratchpad:turn_off()
     self.client.hidden = true
     local client_tags = self.client:tags()
@@ -149,14 +148,14 @@ function scratchpad:turn_off()
     self.client:tags(client_tags)
 end
 
----Toggle current scratchpad clients visiblity. If there isnt one, spawn a new one.
-function scratchpad:toggle()
+---Toggle current scratchpad client visibility. If there isnt one, spawn a new one.
+function scratchpad:toggle_visibility()
     self:connect_unmanage_signal()
     if not self.client then
         local initial_apply
         initial_apply = function (client)
             self.client = client
-            self:apply_props()
+            self:apply_properties()
             capi.client.disconnect_signal("request::manage", initial_apply)
         end
         capi.client.connect_signal("request::manage", initial_apply)
@@ -170,20 +169,24 @@ function scratchpad:toggle()
     end
 end
 
----Set a client to be the scratchpad. If it is already a scratchpad, disable scratchpad status.
+function scratchpad:set_client_to_scratchpad(client)
+    self.client = client
+    self:apply_properties()
+end
+
+---Toggle whether or not the focused client is the scratchpad.
+---If it is already a scratchpad, disable its scratchpad status. Otherwise set as the scratchpad.
 ---@param client client: Client to get set to the current scratchpad.
-function scratchpad:set(client)
+function scratchpad:toggle_scratched_status(client)
     self:connect_unmanage_signal()
     if not self.client then
-        self.client = client
-        self:apply_props()
+        self:set_client_to_scratchpad(client)
     else
-        self:unapply_props()
+        self:unapply_properties()
         if self.client == client then
             self.client = nil
         else
-            self.client = client
-            self:apply_props()
+            self:set_client_to_scratchpad(client)
         end
     end
 end
