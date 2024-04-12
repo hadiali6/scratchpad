@@ -14,6 +14,7 @@ local capi = {
 local scratchpad = {}
 
 ---Constructor for the scratchpad class.
+---@param args table: Arguments.
 ---@return table: Scratchpad object.
 function scratchpad:new(args)
     local obj = {}
@@ -119,7 +120,7 @@ function scratchpad:unapply_properties()
     end
 end
 
----Connect unmanage signal if there hasn't been usage of toggle() or set()
+---Connect unmanage signal if there hasn't been usage of toggle_visibility() or toggle_scratched_status()
 function scratchpad:connect_unmanage_signal()
     if self.has_been_run == false then
         self.has_been_run = true
