@@ -8,7 +8,7 @@ https://github.com/hadiali2006/scratchpad/assets/105244642/b95772b2-3d70-44cd-9b
 1. Make sure you are on the latest git version of [AwesomeWM](https://github.com/awesomeWM/awesome). 
 2. Clone the repository inside your awesome config directory.
 ```
-git clone https://github.com/hadiali2006/scratchpad.git ~/.config/awesome
+git clone https://github.com/hadiali2006/scratchpad.git ~/.config/awesome/scratchpad
 ```
 ### Usage
 <b>Note:</b> This assumes you use the default rc.lua, which can be found on your filesystem in `/etc/xdg/awesome/rc.lua`.  If you use a modular configuration, you can still follow the steps with a few minor differences.
