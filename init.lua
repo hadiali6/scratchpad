@@ -5,43 +5,68 @@ local capi = {
 
 ---@class scratchpad
 ---@field has_been_run boolean: If the scratchpad has been run in any way.
----@field command string: Shell command used to spawn a client.
----@field options table: Proporties applied to the client as scratchpad.
+---@field command string?: Shell command used to spawn a client.
 ---@field client client?: Current scratchpad client.
 ---@field screen screen: The screen that the scratchpad displays to.
+---@field client_options table: Proporties applied to the client as scratchpad.
+---@field scratchpad_options table: Additional features added to the scratchpad.
 local scratchpad = {}
 
 ---Constructor for the scratchpad class.
 ---@param args table: Arguments.
 ---@return table: Scratchpad object.
 function scratchpad:new(args)
-    local obj = {}
+    local default_client_options = {
+        floating     = true,
+        ontop        = false,
+        above        = false,
+        skip_taskbar = false,
+        sticky       = false,
+        geometry = {
+            width  = 1200,
+            height = 900,
+            x      = 360,
+            y      = 90,
+        },
+    }
+    local default_scratchpad_options = {
+        reapply_options = false,
+    }
+    local object = {}
     self.__index = self
-    setmetatable(obj, self)
-    obj.has_been_run = false
-    obj.command = args.command
-    obj.options = args.options
-    obj.client  = args.client
-    obj.screen  = args.screen or awful.screen.focused()
-    return obj
+    setmetatable(object, self)
+    object.has_been_run       = false
+    object.command            = args.command
+    object.client             = args.client
+    object.screen             = args.screen             or awful.screen.focused()
+    object.client_options     = args.client_options     or default_client_options
+    object.scratchpad_options = args.scratchpad_options or default_scratchpad_options
+    return object
+end
+
+---Gets scratchpad options table and defines any property if it wasn't already defined.
+---@return table: Options for the scratchpad.
+function scratchpad:get_scratchpad_options()
+    local options = {}
+    options.reapply_options = self.scratchpad_options.reapply_options or false
+    return options
 end
 
 ---Gets client options table and defines any property if it wasn't already defined.
----@return table: Options for the scratchpad client. 
+---@return table: Options for the scratchpad client.
 function scratchpad:get_client_options()
     local options = {}
-    options.reapply_options = self.options.reapply_options or false
-    options.floating        = self.options.floating        or false
-    options.skip_taskbar    = self.options.skip_taskbar    or false
-    options.ontop           = self.options.ontop           or false
-    options.above           = self.options.above           or false
-    options.sticky          = self.options.sticky          or false
-    if self.options.geometry then
+    options.floating     = self.client_options.floating     or false
+    options.skip_taskbar = self.client_options.skip_taskbar or false
+    options.ontop        = self.client_options.ontop        or false
+    options.above        = self.client_options.above        or false
+    options.sticky       = self.client_options.sticky       or false
+    if self.client_options.geometry then
         options.geometry = {
-            width  = self.options.geometry.width  or 1200,
-            height = self.options.geometry.height or 900,
-            x      = self.options.geometry.x      or 360,
-            y      = self.options.geometry.y      or 90,
+            width  = self.client_options.geometry.width  or 1200,
+            height = self.client_options.geometry.height or 900,
+            x      = self.client_options.geometry.x      or 360,
+            y      = self.client_options.geometry.y      or 90,
         }
     else
         options.geometry = {
@@ -59,66 +84,58 @@ function scratchpad:enable_properties()
     if not self.client then
         return
     end
-    local props = self:get_client_options()
-    local screen_workarea = self.screen.workarea
+    local client_options = self:get_client_options()
     local screen_geometry = self.screen.geometry
-
-    if props.floating then
+    if client_options.floating then
         self.client:set_floating(true)
     end
-    if props.skip_taskbar then
+    if client_options.skip_taskbar then
         self.client.skip_taskbar = true
     end
-    if props.ontop then
+    if client_options.ontop then
         self.client.ontop = true
     end
-    if props.above then
+    if client_options.above then
         self.client.above = true
     end
-    if props.sticky then
+    if client_options.sticky then
         self.client.sticky = true
-    end
-    if props.width and props.width <= 1 then
-        props.width = screen_workarea.width * props.width
-    end
-    if props.height and props.height <= 1 then
-        props.height = screen_workarea.height * props.height
     end
     awful.client.property.set(
         self.client,
         "floating_geometry",
         self.client:geometry({
-            x = screen_geometry.x + props.geometry.x,
-            y = screen_geometry.y + props.geometry.y,
-            width = props.geometry.width,
-            height = props.geometry.height,
+            x      = screen_geometry.x + client_options.geometry.x,
+            y      = screen_geometry.y + client_options.geometry.y,
+            width  = client_options.geometry.width,
+            height = client_options.geometry.height,
         })
     )
 end
 
----Disable any client properties applied to the scratchpad as per defined in options table.
+---Disable any client properties applied to the scratchpad as per defined in the client_options table.
 function scratchpad:disable_properties()
     if not self.client then
         return
     end
-    local props = self:get_client_options()
+    local client_options = self:get_client_options()
     if self.client.hidden then
         self.client.hidden = false
         self.client:move_to_tag(awful.tag.selected(self.screen))
     end
-    if props.floating then
+    if client_options.floating then
         self.client:set_floating(false)
     end
-    if props.skip_taskbar then
+    if client_options.skip_taskbar then
         self.client.skip_taskbar = false
     end
-    if props.ontop then
+    if client_options.ontop then
         self.client.ontop = false
     end
-    if props.above then
+    if client_options.above then
         self.client.above = false
     end
-    if props.sticky then
+    if client_options.sticky then
         self.client.sticky = false
     end
 end
@@ -137,7 +154,7 @@ end
 
 ---Enable current scratchpad client visibility.
 function scratchpad:turn_on()
-    if self.options.reapply_options then
+    if self.scratchpad_options.reapply_options then
         self:enable_properties()
     end
     self.client.hidden = false
