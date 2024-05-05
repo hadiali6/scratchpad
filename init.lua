@@ -1,8 +1,6 @@
 local awful = require("awful")
 local capi = {
     client = client,
-    mouse  = mouse,
-    screen = screen
 }
 
 ---@class scratchpad
@@ -21,22 +19,23 @@ function scratchpad:new(args)
     self.__index = self
     setmetatable(obj, self)
     obj.has_been_run = false
-    obj.command      = args.command or "alacritty"
-    obj.options      = args.options
-    obj.client       = args.client
-    obj.screen       = args.screen or awful.screen.focused()
+    obj.command = args.command
+    obj.options = args.options
+    obj.client  = args.client
+    obj.screen  = args.screen or awful.screen.focused()
     return obj
 end
 
----Getter for client options table. Will define any property if it wasn't already defined.
----@return table: Client options.
+---Gets client options table and defines any property if it wasn't already defined.
+---@return table: Options for the scratchpad client. 
 function scratchpad:get_client_options()
     local options = {}
-    options.floating     = self.options.floating     or false
-    options.skip_taskbar = self.options.skip_taskbar or false
-    options.ontop        = self.options.ontop        or false
-    options.above        = self.options.above        or false
-    options.sticky       = self.options.sticky       or false
+    options.reapply_options = self.options.reapply_options or false
+    options.floating        = self.options.floating        or false
+    options.skip_taskbar    = self.options.skip_taskbar    or false
+    options.ontop           = self.options.ontop           or false
+    options.above           = self.options.above           or false
+    options.sticky          = self.options.sticky          or false
     if self.options.geometry then
         options.geometry = {
             width  = self.options.geometry.width  or 1200,
@@ -55,8 +54,8 @@ function scratchpad:get_client_options()
     return options
 end
 
----Apply client properties to the scratchpad as per defined in options table.
-function scratchpad:apply_properties()
+---Enable client properties to the scratchpad as per defined in options table.
+function scratchpad:enable_properties()
     if not self.client then
         return
     end
@@ -85,16 +84,20 @@ function scratchpad:apply_properties()
     if props.height and props.height <= 1 then
         props.height = screen_workarea.height * props.height
     end
-    awful.client.property.set(self.client, "floating_geometry", self.client:geometry({
-        x      = screen_geometry.x + props.geometry.x,
-        y      = screen_geometry.y + props.geometry.y,
-        width  = props.geometry.width,
-        height = props.geometry.height,
-    }))
+    awful.client.property.set(
+        self.client,
+        "floating_geometry",
+        self.client:geometry({
+            x = screen_geometry.x + props.geometry.x,
+            y = screen_geometry.y + props.geometry.y,
+            width = props.geometry.width,
+            height = props.geometry.height,
+        })
+    )
 end
 
 ---Disable any client properties applied to the scratchpad as per defined in options table.
-function scratchpad:unapply_properties()
+function scratchpad:disable_properties()
     if not self.client then
         return
     end
@@ -124,7 +127,7 @@ end
 function scratchpad:connect_unmanage_signal()
     if self.has_been_run == false then
         self.has_been_run = true
-        capi.client.connect_signal("request::unmanage", function (current_client)
+        capi.client.connect_signal("request::unmanage", function(current_client)
             if self.client == current_client then
                 self.client = nil
             end
@@ -134,9 +137,13 @@ end
 
 ---Enable current scratchpad client visibility.
 function scratchpad:turn_on()
+    if self.options.reapply_options then
+        self:enable_properties()
+    end
     self.client.hidden = false
     self.client:move_to_tag(awful.tag.selected(self.screen))
     capi.client.focus = self.client
+    self.client:raise()
 end
 
 ---Disable current scratchpad client visibility.
@@ -152,27 +159,30 @@ end
 ---Toggle current scratchpad client visibility. If there isnt one, spawn a new one.
 function scratchpad:toggle_visibility()
     self:connect_unmanage_signal()
-    if not self.client then
-        local initial_apply
-        initial_apply = function (client)
-            self.client = client
-            self:apply_properties()
-            capi.client.disconnect_signal("request::manage", initial_apply)
-        end
-        capi.client.connect_signal("request::manage", initial_apply)
-        awful.spawn(self.command, false)
-    else
+    if self.client then
         if self.client.hidden then
             self:turn_on()
         else
             self:turn_off()
+        end
+    else
+        local initial_apply
+        initial_apply = function(client)
+            self.client = client
+            self:enable_properties()
+            capi.client.disconnect_signal("request::manage", initial_apply)
+        end
+        capi.client.connect_signal("request::manage", initial_apply)
+        if self.command then
+            awful.spawn(self.command, false)
         end
     end
 end
 
 function scratchpad:set_client_to_scratchpad(client)
     self.client = client
-    self:apply_properties()
+    self:enable_properties()
+    self.client:raise()
 end
 
 ---Toggle whether or not the focused client is the scratchpad.
@@ -180,15 +190,15 @@ end
 ---@param client client: Client to get set to the current scratchpad.
 function scratchpad:toggle_scratched_status(client)
     self:connect_unmanage_signal()
-    if not self.client then
-        self:set_client_to_scratchpad(client)
-    else
-        self:unapply_properties()
+    if self.client then
+        self:disable_properties()
         if self.client == client then
             self.client = nil
         else
             self:set_client_to_scratchpad(client)
         end
+    else
+        self:set_client_to_scratchpad(client)
     end
 end
 
