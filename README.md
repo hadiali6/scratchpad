@@ -8,13 +8,26 @@ It's a window in which you can toggle its visibility while keeping it running in
 https://github.com/hadiali6/scratchpad/assets/105244642/b95772b2-3d70-44cd-9b44-3408f5d66829
 
 ## Installation
-1. Make sure you are on the latest git version of [AwesomeWM](https://github.com/awesomeWM/awesome). 
-2. Clone the repository inside your awesome config directory.
+<b>NOTE:</b> Make sure you are on the latest git version of [AwesomeWM](https://github.com/awesomeWM/awesome). 
+### LuaRocks
+By default, LuaRocks loads modules from the
+runtime path under: `/usr/share/`. However, the runtime path is dependent on your
+Lua version. If you are using Lua 5.4 then it's under: `/usr/share/lua/5.4`, or
+if you are using LuaJIT, it's under: `/usr/share/lua/5.1` or `/usr/share/luajit-2.1`.
+[See the LuaRocks package here](https://luarocks.org/modules/hadiali/awesome-scratchpad).
+```bash
+sudo luarocks --lua-version<your-lua-version> install awesome-scratchpad
+```
+### Manual
+Clone the repository inside your awesome config directory.
 ```
 git clone https://github.com/hadiali6/scratchpad.git ~/.config/awesome/scratchpad
 ```
 ## Usage
-<b>Note:</b> This assumes you use the default rc.lua, which can be found on your filesystem in `/etc/xdg/awesome/rc.lua`.  If you use a modular configuration, you can still follow the steps with a few minor differences.
+<b>NOTE:</b> This assumes you use the default rc.lua, found under: `/etc/xdg/awesome/rc.lua`
+if you don't already have a config.  If you use a modular configuration, you can still follow
+the steps with a few minor differences.
+
 1. At the top of your config where all of the awesome libraries are being initialized:
 ```lua
 -- Initialize scratchpad module.
@@ -98,7 +111,7 @@ end),
 
 | Public Functions      | Description                                                                                                                                                                                            |
 | :-------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `:new(args) -> table` | Constructor for the scratchpad class.                                                                                                                                                                  |
+| `:new(args)`          | Constructor for the scratchpad class. Returns a scratchpad object.                                                                                                                                     |
 | `:turn_on()`          | Enable current scratchpad client visibility.                                                                                                                                                           |
 | `:turn_off()`         | Disable current scratchpad client visibility.                                                                                                                                                          |
 | `:toggle()`           | Toggle current scratchpad client visibility. If there isnt one, spawn a new one.                                                                                                                       |
@@ -106,8 +119,8 @@ end),
 
 ## Configuration
 ### Client Options
-See the [offical documentaion for the client module](https://awesomewm.org/apidoc/core_components/client.html) within AwesomeWM.
-##### Defaults
+See the [offical documentaion for the client component](https://awesomewm.org/apidoc/core_components/client.html) within AwesomeWM.
+#### Defaults
 These are the default client options if you don't define them within your configuration:
 ```lua
 floating = true,
@@ -119,14 +132,14 @@ geometry = { width = 1200, height = 900, x = 360, y = 90, }
 ```
 
 ### Scratchpad Options
-##### Reapply Options
+#### Reapply Options
 If true, the client options will be reapplied every time you turn it on. For example when you move or resize the client, it will go back to its original state when you turn it back on.
-##### Only One
+#### Only One
 If true, there will only be one scratchpad allowed on the screen at a time. You must define a group as it iterates through the group to hide the other scratchpads. If a scratchpad in another group is on, then it won't be hidden.
 <!-- ##### Clone Focus On Lost -->
 <!-- If true, the scratchpad will hide itself when it loses focus. <b>NOTE:</b> This currently has issues when the previous focused window is a big gui application like firefox, gimp, and libreoffice.  -->
 
-##### Defaults
+#### Defaults
 These are the default scratchpad options if you don't define them within your configuration:
 ```lua
 scratchpad_options = {
