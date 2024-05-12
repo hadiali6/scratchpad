@@ -86,7 +86,7 @@ awful.key({ modkey, "Alt" }, "F2", function(c)
 end),
 ```
 ## Details
-| Scratchpad Fields    | Type          | Description                                     |
+| Object Fields        | Type          | Description                                     |
 | :------------------- | :--------:    | :---------------------------------------------- |
 | `id`                 | `string`      | Identifier. Defaults to random numbers.         |
 | `command`            | `string\|nil` | Shell command used to spawn a client.           |
@@ -96,19 +96,13 @@ end),
 | `client_options`     | `table`       | Proporties applied to the client as scratchpad. |
 | `scratchpad_options` | `table`       | Additional features added to the scratchpad.    |
 
-| Scratchpad Object Methods                               | Description                                                                                                                                                                                            |
-| :-------------------------------------                  | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `:new(args) -> table`                                   | Constructor for the scratchpad class.                                                                                                                                                                  |
-| `:get_scratchpad_options() -> table`                    | Gets scratchpad options table and defines any property if it wasn't already defined.                                                                                                                   |
-| `:get_client_options() -> table`                        | Gets client options table and defines any property if it wasn't already defined.                                                                                                                       |
-| `:enable_client_options()`                              | Enable client properties to the scratchpad as per defined in options table.                                                                                                                            |
-| `:disable_client_options()`                             | Disable any client properties applied to the scratchpad as per defined in the client_options table.                                                                                                    |
-| `:turn_off_other_scratchpads()`                         | Turns off any scratchpad within the same group that is currently visible. Note: requires a group table.                                                                                                |
-| `:apply_client_signals_to_scratchpad()`                 | Applies signals for when the client is created or killed. Applies signals for any field in scratchpad_options set to true. Used for when there isnt a current client within the scratchpad.            |
-| `:turn_on()`                                            | Enable current scratchpad client visibility.                                                                                                                                                           |
-| `:turn_off()`                                           | Disable current scratchpad client visibility.                                                                                                                                                          |
-| `:toggle_visibility()`                                  | Toggle current scratchpad client visibility. If there isnt one, spawn a new one.                                                                                                                       |
-| `:set_new_client(client)`                               | Set a new clinet into the scratchpad at runtime. If it's already within the scratchpad, eject the client into the current tag. Otherwise set the passed in client to the client within the scratchpad. |
+| Public Functions      | Description                                                                                                                                                                                            |
+| :-------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `:new(args) -> table` | Constructor for the scratchpad class.                                                                                                                                                                  |
+| `:turn_on()`          | Enable current scratchpad client visibility.                                                                                                                                                           |
+| `:turn_off()`         | Disable current scratchpad client visibility.                                                                                                                                                          |
+| `:toggle()`           | Toggle current scratchpad client visibility. If there isnt one, spawn a new one.                                                                                                                       |
+| `:set(client)`        | Set a new clinet into the scratchpad at runtime. If it's already within the scratchpad, eject the client into the current tag. Otherwise set the passed in client to the client within the scratchpad. |
 
 ## Configuration
 ### Client Options
@@ -129,8 +123,8 @@ geometry = { width = 1200, height = 900, x = 360, y = 90, }
 If true, the client options will be reapplied every time you turn it on. For example when you move or resize the client, it will go back to its original state when you turn it back on.
 ##### Only One
 If true, there will only be one scratchpad allowed on the screen at a time. You must define a group as it iterates through the group to hide the other scratchpads. If a scratchpad in another group is on, then it won't be hidden.
-##### Clone Focus On Lost
-If true, the scratchpad will hide itself when it loses focus. <b>NOTE:</b> This currently has issues when the previous focused window is a big gui application like firefox, gimp, and libreoffice. 
+<!-- ##### Clone Focus On Lost -->
+<!-- If true, the scratchpad will hide itself when it loses focus. <b>NOTE:</b> This currently has issues when the previous focused window is a big gui application like firefox, gimp, and libreoffice.  -->
 
 ##### Defaults
 These are the default scratchpad options if you don't define them within your configuration:
@@ -138,6 +132,5 @@ These are the default scratchpad options if you don't define them within your co
 scratchpad_options = {
     reapply_options = false,
     only_one = false,
-    close_on_focus_lost = false,
 }
 ```
