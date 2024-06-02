@@ -29,93 +29,125 @@ if you don't already have a config.  If you use a modular configuration, you can
 the steps with a few minor differences.
 
 1. At the top of your config where all of the awesome libraries are being initialized:
+
 ```lua
 -- Initialize scratchpad module.
 local scratchpad = require("scratchpad")
 ```
-2. Initialize all instances of the scratchpads you want to use:
+
+2. Initialize all instances of the scratchpads and group(s) you want to use:
+
 ```lua
 -- Initialize a table which will contain all of your scratchpad objects. 
-local pads = {}
-pads.first_pad = scratchpad:new({ -- Initialize scratchpad object.
-    command = "alacritty",        -- Command run if there isnt already a client set.
-    group   = pads,
-    client_options = {            -- All options are optional.
-        floating     = true,
-        ontop        = false,
-        above        = false,
+local pads = scratchpad.group:new({
+    id = "my-group-id",
+    scratchpads = {},
+    validate = true,
+})
+pads:add_scratchpad(scratchpad.object:new({ -- Initialize scratchpad object.
+    id = "my-scratchpad-id-1",
+    command = "alacritty",    -- Command run if there isnt already a client set.
+    group = pads,
+    client_options = {        -- All options are optional.
+        floating = true,
+        ontop = false,
+        above = false,
         skip_taskbar = false, -- These are the defaults if you don't specify client_options.
-        sticky       = false,
+        sticky = false,
         geometry = {
             width  = 1200,
             height = 900,
-            x      = 360,
-            y      = 90,
+            x = 360,
+            y = 90,
         },
     },
     scratchpad_options = { -- These are the defaults if you don't specify scratchpad_options.
         reapply_options = false,
-        only_one        = false,
+        only_one = false,
     },
-})
-pads.second_pad = scratchpad:new({
+    validate = true,       -- Validates config if true.
+}))
+pads:add_scratchpad(scratchpad.object:new({
+    id = "my-scratchpad-id-2",
     command = "qalculate-qt",
-    group   = pads,
+    group = pads,
     client_options = {
-        floating     = true,
-        ontop        = false,
-        above        = false,
+        floating = true,
+        ontop = false,
+        above = false,
         skip_taskbar = false,
-        sticky       = false,
+        sticky = false,
         geometry = {
-            width  = 1200,
+            width = 1200,
             height = 900,
-            x      = 360,
-            y      = 90,
+            x = 360,
+            y = 90,
         },
     },
     scratchpad_options = {
         reapply_options = false,
-        only_one        = false,
+        only_one = false,
     },
-})
+    validate = true,
+}))
 ```
+
 3. Add the following binds to your global keybinds: (The keybind is just an example, set it to whatever you want)
+
 ```lua
 awful.key({ modkey, }, "F1", function()
-    pads.first_pad:toggle_visibility()
+    pads.scratchpads[1]:toggle()
 end),
 awful.key({ modkey, }, "F2", function()
-    pads.second_pad:toggle_visibility()
+    pads.scratchpads[2]:toggle()
 end),
 ```
+
 4. Add the following binds to your client keybinds: (The keybind is just an example, set it to whatever you want)
+
 ```lua
 awful.key({ modkey, "Alt" }, "F1", function(c)
-    pads.first_pad:toggle_scratched_status(c)
+    pads.scratchpads[1]:set(c)
 end),
 awful.key({ modkey, "Alt" }, "F2", function(c)
-    pads.second_pad:toggle_scratched_status(c)
+    pads.scratchpads[2]:set(c)
 end),
 ```
-## Details
-| Object Fields        | Type          | Description                                     |
-| :------------------- | :--------:    | :---------------------------------------------- |
-| `id`                 | `string`      | Identifier. Defaults to random numbers.         |
-| `command`            | `string\|nil` | Shell command used to spawn a client.           |
-| `group`              | `table\|nil`  | A common group of scratchpads.                  |
-| `client`             | `client\|nil` | Current scratchpad client.                      |
-| `screen`             | `screen`      | The screen that the scratchpad displays to.     |
-| `client_options`     | `table`       | Proporties applied to the client as scratchpad. |
-| `scratchpad_options` | `table`       | Additional features added to the scratchpad.    |
 
-| Public Functions      | Description                                                                                                                                                                                            |
-| :-------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `:new(args)`          | Constructor for the scratchpad class. Returns a scratchpad object.                                                                                                                                     |
-| `:turn_on()`          | Enable current scratchpad client visibility.                                                                                                                                                           |
-| `:turn_off()`         | Disable current scratchpad client visibility.                                                                                                                                                          |
-| `:toggle()`           | Toggle current scratchpad client visibility. If there isnt one, spawn a new one.                                                                                                                       |
-| `:set(client)`        | Set a new clinet into the scratchpad at runtime. If it's already within the scratchpad, eject the client into the current tag. Otherwise set the passed in client to the client within the scratchpad. |
+## Details
+| Scratchpaad Object Fields | Type          | Description                                        |
+| :-------------------      | :--------:    | :------------------------------------------------- |
+| `id`                      | `string`      | Identifier. Defaults to a string ofrandom numbers. |
+| `command`                 | `string\|nil` | Shell command used to spawn a client.              |
+| `group`                   | `table\|nil`  | A common group of scratchpads.                     |
+| `client`                  | `client\|nil` | Current scratchpad client.                         |
+| `screen`                  | `screen`      | The screen that the scratchpad displays to.        |
+| `client_options`          | `table`       | Proporties applied to the client as scratchpad.    |
+| `scratchpad_options`      | `table`       | Additional features added to the scratchpad.       |
+
+| Scratchpad Object Functions  | Description                                                                                                                                                                                 |
+| :--------------------        | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `:new(args)`                 | Constructor for the scratchpad class. Returns a scratchpad object.                                                                                                                                     |
+| `:turn_on()`                 | Enable current scratchpad client visibility.                                                                                                                                                           |
+| `:turn_off()`                | Disable current scratchpad client visibility.                                                                                                                                                          |
+| `:toggle()`                  | Toggle current scratchpad client visibility. If there isnt one, spawn a new one.                                                                                                                       |
+| `:set(client)`               | Set a new clinet into the scratchpad at runtime. If it's already within the scratchpad, eject the client into the current tag. Otherwise set the passed in client to the client within the scratchpad. |
+| `:attatch_manage_signal()`   | Attatches the signal for when the client is added to the scratchpad, it will disconnect itself when executed.                                                                                          |
+| `:attatch_unmanage_signal()` | Attatches the signal for when the client is killed, it will disconnect itself when executed.                                                                                                           |
+
+| Scratchpad Group Object Fields | Type     | Description                                         |
+| :----------------------------- | :-----:  | :-------------------------------------------------- |
+| `id`                           | `string` | Identifier. Defaults to a string of random numbers. |
+| `scratchpads`                  | `table`  | Scratchpad group object.                            |
+
+| Scratchpad Group Object Functions                  | Description                                                               |
+| :------------------------------------------------- | :------------------------------------------------------------------------ |
+| `:new(args)`                                       | Constructor of the Scratchpad Group object. Returns a scratchpad object.  |
+| `:add_scratchpad(new_scratchpad)`                  | Adds a new scratchpad to the group.                                       |
+| `:remove_scratchpad(scratchpad_id)`                | Remove a scratchpad from the group.                                       |
+| `:get_scratchpad(scratchpad_id, key)`              | Gets a scratchpad from the group.                                         |
+| `:do_for_each_scratchpad(callback)`                | Runs a callback function for each scratchpad in the group.                |
+| `:do_for_scratchpad(scratchpad_id, key, callback)` | Runs a callback function for a scratchpad given its id or key.            |
 
 ## Configuration
 ### Client Options
@@ -141,9 +173,11 @@ If true, there will only be one scratchpad allowed on the screen at a time. You 
 
 #### Defaults
 These are the default scratchpad options if you don't define them within your configuration:
+
 ```lua
 scratchpad_options = {
     reapply_options = false,
     only_one = false,
 }
 ```
+

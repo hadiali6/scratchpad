@@ -2,7 +2,9 @@
 ---@module "scratchpad"
 
 --[[
+
 Scratchpad module for AwesomeWM.
+
 ]]--
 
 local error = error
@@ -68,6 +70,8 @@ function scratchpad:new(args)
 end
 
 local signal_callbacks = {
+    apply_client = nil,
+    remove_client = nil,
     reapply_options = function(scratchpad_object)
         utils.enable_client_properties(
             scratchpad_object.client,
@@ -90,8 +94,7 @@ local signal_callbacks = {
 }
 
 function scratchpad:attatch_unmanage_signal()
-    local remove_client
-    remove_client = function(client)
+    signal_callbacks.remove_client = function(client)
         if self.client == client then
             self.client = nil
             if self.scratchpad_options.reapply_options then
@@ -106,15 +109,20 @@ function scratchpad:attatch_unmanage_signal()
                     signal_callbacks.only_one
                 )
             end
-            capi.client.disconnect_signal("request::unmanage", remove_client)
+            capi.client.disconnect_signal(
+                "request::unmanage",
+                signal_callbacks.remove_client
+            )
         end
     end
-    capi.client.connect_signal("request::unmanage", remove_client)
+    capi.client.connect_signal(
+        "request::unmanage",
+        signal_callbacks.remove_client
+    )
 end
 
 function scratchpad:attatch_manage_signal()
-    local apply_client
-    apply_client = function(client)
+    signal_callbacks.apply_client = function(client)
         self.client = client
         utils.enable_client_properties(
             self.client,
@@ -134,9 +142,15 @@ function scratchpad:attatch_manage_signal()
             )
         end
         self:emit_signal("scratchpad::only_one")
-        capi.client.disconnect_signal("request::manage", apply_client)
+        capi.client.disconnect_signal(
+            "request::manage",
+            signal_callbacks.apply_client
+        )
     end
-    capi.client.connect_signal("request::manage", apply_client)
+    capi.client.connect_signal(
+        "request::manage",
+        signal_callbacks.apply_client
+    )
 end
 
 ---Enable current scratchpad client visibility.
@@ -194,15 +208,24 @@ end
 ---Otherwise set the passed in client to the client within the scratchpad.
 ---@param new_client client: Client to get set to the current scratchpad.
 function scratchpad:set(new_client)
+    local remove_client = function()
+        utils.disable_client_properties(
+            self.client,
+            self.screen,
+            self.client_options
+        )
+        self.client = nil
+    end
     if self.client and self.client == new_client then
-        capi.client.emit_signal("request::unmanage", self.client)
+        remove_client()
         return
     end
     if self.client then
-        capi.client.emit_signal("request::unmanage", self.client)
+        remove_client()
+    else
+        self:attatch_manage_signal()
     end
-    self:attatch_unmanage_signal()
-    self.client = new_client
+    capi.client.emit_signal("request::manage", new_client)
     utils.enable_client_properties(
         self.client,
         self.screen,
