@@ -35,18 +35,18 @@ local default_scratchpad_options = {
 }
 
 ---@class scratchpad: gears.object
----@field id string Identifier.
----@field command string? Shell command used to spawn a client.
----@field group (group|table)? A common group of scratchpads.
----@field client client? Current scratchpad client.
----@field screen screen? The screen that the scratchpad displays to.
----@field client_options table Proporties applied to the client as scratchpad.
----@field scratchpad_options table Additional features added to the scratchpad.
+---@field id string # Identifier.
+---@field command string? # Shell command used to spawn a client.
+---@field group (group|table)? # A common group of scratchpads.
+---@field client client? # Current scratchpad client.
+---@field screen screen? # The screen that the scratchpad displays to.
+---@field client_options table # Proporties applied to the client as scratchpad.
+---@field scratchpad_options table # Additional features added to the scratchpad.
 local scratchpad = {}
 
 ---Constructor for the scratchpad class.
----@param args? table: Arguments.
----@return scratchpad: Scratchpad object inheriting from gears.object.
+---@param args? table # Arguments.
+---@return scratchpad # Scratchpad object inheriting from gears.object.
 function scratchpad:new(args)
     args = args or {}
     local object = setmetatable({}, self)
@@ -206,7 +206,7 @@ end
 ---Set a new clinet into the scratchpad at runtime.
 ---If it's already within the scratchpad, eject the client into the current tag.
 ---Otherwise set the passed in client to the client within the scratchpad.
----@param new_client client: Client to get set to the current scratchpad.
+---@param new_client client # Client to get set to the current scratchpad.
 function scratchpad:set(new_client)
     local remove_client = function()
         utils.disable_client_properties(
