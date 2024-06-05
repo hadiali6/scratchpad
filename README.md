@@ -16,7 +16,7 @@ Lua version. If you are using Lua 5.4 then it's under: `/usr/share/lua/5.4`, or
 if you are using LuaJIT, it's under: `/usr/share/lua/5.1` or `/usr/share/luajit-2.1`.
 [See the LuaRocks package here](https://luarocks.org/modules/hadiali/awesome-scratchpad).
 ```bash
-sudo luarocks --lua-version<your-lua-version> install awesome-scratchpad
+sudo luarocks --lua-version <your-lua-version> install awesome-scratchpad
 ```
 ### Manual
 Clone the repository inside your awesome config directory.
