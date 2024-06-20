@@ -1,5 +1,4 @@
 ---@meta
----@module "group"
 
 --[[
 
@@ -46,7 +45,7 @@ end
 function group:add_scratchpad(new_scratchpad)
     for key, scratchpad in pairs(self.scratchpads) do
         if scratchpad.id == new_scratchpad.id then
-            rawset(self.scratchpads, key, new_scratchpad)
+            error("There is already a scratchpad with that ID. Please use a different ID")
             return
         end
     end
