@@ -6,7 +6,6 @@ Scratchpad module for AwesomeWM.
 
 ]]--
 
-local error = error
 local math = math
 local pairs = pairs
 local require = require
@@ -21,16 +20,16 @@ local utils = require(tostring(...):match(".*scratchpad.lua") .. ".utils")
 local capi = { client = client }
 
 local default_client_options = {
-    floating     = true,
-    ontop        = false,
-    above        = false,
+    floating = true,
+    ontop = false,
+    above = false,
     skip_taskbar = false,
-    sticky       = false,
-    geometry = { width = 1200, height = 900, x = 360, y = 90, },
+    sticky = false,
+    geometry = { width = 1200, height = 900, x = 360, y = 90 },
 }
 local default_scratchpad_options = {
     reapply_options = false,
-    only_one        = false,
+    only_one = false,
 }
 
 ---@class scratchpad: gears.object
@@ -50,21 +49,15 @@ function scratchpad:new(args)
     args = args or {}
     local object = setmetatable({}, self)
     self.__index = self
-    object.id                 = args.id                 or string.sub(math.random(), 3)
-    object.command            = args.command
-    object.group              = args.group
-    object.client             = args.client
-    object.screen             = args.screen             or awful.screen.focused()
-    object.client_options     = args.client_options
+    object.id = args.id or string.sub(math.random(), 3)
+    object.command = args.command
+    object.group = args.group
+    object.client = args.client
+    object.screen = args.screen or awful.screen.focused()
+    object.client_options = args.client_options
     object.scratchpad_options = args.scratchpad_options
     utils.combine(object.client_options, default_client_options)
     utils.combine(object.scratchpad_options, default_scratchpad_options)
-    args.validate = args.validate or true
-    if args.validate then
-        if not utils.validate_scratchpad_config(object) then
-            error("Invalid scratchpad config")
-        end
-    end
     return gears.object({ class = object })
 end
 
@@ -79,7 +72,9 @@ local signal_callbacks = {
         )
     end,
     only_one = function(current_scratchpad)
-        if not current_scratchpad.group then return end
+        if not current_scratchpad.group then
+            return
+        end
         for _, scratchpad_object in pairs(current_scratchpad.group.scratchpads) do
             if
                 scratchpad_object.client
@@ -146,10 +141,7 @@ function scratchpad:attatch_manage_signal()
             signal_callbacks.apply_client
         )
     end
-    capi.client.connect_signal(
-        "request::manage",
-        signal_callbacks.apply_client
-    )
+    capi.client.connect_signal("request::manage", signal_callbacks.apply_client)
 end
 
 ---Enable current scratchpad client visibility.
@@ -223,6 +215,7 @@ function scratchpad:set(new_client)
         remove_client()
     else
         self:attatch_manage_signal()
+        self:attatch_unmanage_signal()
     end
     capi.client.emit_signal("request::manage", new_client)
     utils.enable_client_properties(

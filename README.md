@@ -42,7 +42,6 @@ local scratchpad = require("scratchpad")
 local pads = scratchpad.group:new({
     id = "my-group-id",
     scratchpads = {},
-    validate = true,
 })
 pads:add_scratchpad(scratchpad.object:new({ -- Initialize scratchpad object.
     id = "my-scratchpad-id-1",
@@ -65,7 +64,6 @@ pads:add_scratchpad(scratchpad.object:new({ -- Initialize scratchpad object.
         reapply_options = false,
         only_one = false,
     },
-    validate = true,       -- Validates config if true.
 }))
 pads:add_scratchpad(scratchpad.object:new({
     id = "my-scratchpad-id-2",
@@ -88,9 +86,7 @@ pads:add_scratchpad(scratchpad.object:new({
         reapply_options = false,
         only_one = false,
     },
-    validate = true,
 }))
-```
 
 3. Add the following binds to your global keybinds: (The keybind is just an example, set it to whatever you want)
 
