@@ -15,7 +15,7 @@ local tostring = tostring
 
 local awful = require("awful")
 local gears = require("gears")
-local utils = require(tostring(...):match(".*scratchpad.lua") .. ".utils")
+local utils = require(tostring(...):match("(.+)%..+$") .. ".utils")
 
 local capi = { client = client }
 
