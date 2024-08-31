@@ -1,6 +1,5 @@
 local require = require
-local scratchpad = {}
-scratchpad.object = require(... .. ".lua.object")
-scratchpad.group  = require(... .. ".lua.group")
-scratchpad.utils  = require(... .. ".lua.utils")
+local scratchpad = require(... .. ".scratchpad")
+scratchpad.group = require(... .. ".group")
+scratchpad.utils = require(... .. ".utils")
 return scratchpad

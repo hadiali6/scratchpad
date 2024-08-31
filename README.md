@@ -43,7 +43,7 @@ local pads = scratchpad.group:new({
     id = "my-group-id",
     scratchpads = {},
 })
-pads:add_scratchpad(scratchpad.object:new({ -- Initialize scratchpad object.
+pads:add_scratchpad(scratchpad:new({ -- Initialize scratchpad object.
     id = "my-scratchpad-id-1",
     command = "alacritty",    -- Command run if there isnt already a client set.
     group = pads,
@@ -65,7 +65,7 @@ pads:add_scratchpad(scratchpad.object:new({ -- Initialize scratchpad object.
         only_one = false,
     },
 }))
-pads:add_scratchpad(scratchpad.object:new({
+pads:add_scratchpad(scratchpad:new({
     id = "my-scratchpad-id-2",
     command = "qalculate-qt",
     group = pads,
@@ -87,6 +87,7 @@ pads:add_scratchpad(scratchpad.object:new({
         only_one = false,
     },
 }))
+```
 
 3. Add the following binds to your global keybinds: (The keybind is just an example, set it to whatever you want)
 
