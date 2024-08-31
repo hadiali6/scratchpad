@@ -13,7 +13,6 @@ local require = require
 local setmetatable = setmetatable
 local string = string
 local table = table
-local tostring = tostring
 
 local gears = require("gears")
 
